@@ -5,14 +5,15 @@ import "core:fmt"
 import "core:strconv"
 foreign import libpq "libpq.dylib"
 
+// From libpq-fe.h
 @(default_calling_convention="c")
 foreign libpq {
   PQconnectdb :: proc(conninfo: cstring) -> ^PGconn ---
   PQfinish :: proc(connection: ^PGconn) ---
-  PQstatus :: proc(connection: ^PGconn) -> ConnStatusType ---
+  PQstatus :: proc(connection: ^PGconn) -> Connection_Status ---
   PQerrorMessage :: proc(connection: ^PGconn) -> cstring ---
   PQexec :: proc(connection: ^PGconn, query: cstring) -> ^PGresult ---
-  PQresultStatus :: proc(result: ^PGresult) -> ExecStatusType ---
+  PQresultStatus :: proc(result: ^PGresult) -> Exec_Status ---
   PQntuples :: proc(result: ^PGresult) -> c.int ---
   PQnfields :: proc(result: ^PGresult) -> c.int ---
   PQfnumber :: proc(result: ^PGresult, field_name: cstring) -> c.int ---
@@ -24,55 +25,44 @@ foreign libpq {
   ) -> cstring ---
 }
 
+// From libpq-fe.h
 PGconn :: struct {}
 PGresult :: struct {}
-ConnStatusType :: enum c.int {
-	OK,
-	BAD,
-	/* Non-blocking mode only below here */
-
-	/*
-	 * The existence of these should never be relied upon - they should only
-	 * be used for user feedback or similar purposes.
-	 */
-	STARTED,			      /* Waiting for connection to be made.  */
-	MADE,			          /* Connection OK; waiting to send.     */
-	AWAITING_RESPONSE,	/* Waiting for a response from the postmaster. */
-	AUTH_OK,			      /* Received authentication; waiting for backend startup. */
-	SETENV,			        /* This state is no longer used. */
-	SSL_STARTUP,		    /* Negotiating SSL. */
-	NEEDED,			        /* Internal state: connect() needed */
-	CHECK_WRITABLE,	    /* Checking if session is read-write. */
-	CONSUME,			      /* Consuming any extra messages. */
-	GSS_STARTUP,		    /* Negotiating GSSAPI. */
-	CHECK_TARGET,	      /* Checking target server properties. */
-	CHECK_STANDBY,	    /* Checking if server is in standby mode. */
+Connection_Status :: enum c.int {
+  OK,
+  BAD,
+  STARTED,
+  MADE,
+  AWAITING_RESPONSE,
+  AUTH_OK,
+  SETENV,
+  SSL_STARTUP,
+  NEEDED,
+  CHECK_WRITABLE,
+  CONSUME,
+  GSS_STARTUP,
+  CHECK_TARGET,
+  CHECK_STANDBY,
 }
-
-ExecStatusType :: enum c.int {
-	EMPTY_QUERY = 0,		/* empty query string was executed */
-	COMMAND_OK,			/* a query command that doesn't return
-								 * anything was executed properly by the
-								 * backend */
-	TUPLES_OK,			/* a query command that returns tuples was
-								 * executed properly by the backend, PGresult
-								 * contains the result tuples */
-	COPY_OUT,				/* Copy Out data transfer in progress */
-	COPY_IN,				/* Copy In data transfer in progress */
-	BAD_RESPONSE,			/* an unexpected response was recv'd from the
-								 * backend */
-	NONFATAL_ERROR,		/* notice or warning message */
-	FATAL_ERROR,			/* query failed */
-	COPY_BOTH,			/* Copy In/Out data transfer in progress */
-	SINGLE_TUPLE,			/* single tuple from larger resultset */
-	PIPELINE_SYNC,		/* pipeline synchronization point */
-	PIPELINE_ABORTED,		/* Command didn't run because of an abort
-								 * earlier in a pipeline */
-
+Exec_Status :: enum c.int {
+  EMPTY_QUERY = 0,
+  COMMAND_OK,
+  TUPLES_OK,
+  COPY_OUT,
+  COPY_IN,
+  BAD_RESPONSE,
+  NONFATAL_ERROR,
+  FATAL_ERROR,
+  COPY_BOTH,
+  SINGLE_TUPLE,
+  PIPELINE_SYNC,
+  PIPELINE_ABORTED,
 }
 
 main :: proc() {
-  connection := PQconnectdb("host=localhost connect_timeout=10 password=password user=postgres")
+  connection := PQconnectdb(
+    "host=localhost connect_timeout=10 password=password user=postgres",
+  )
   defer PQfinish(connection)
 
   if PQstatus(connection) != .OK {
