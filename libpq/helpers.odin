@@ -4,13 +4,6 @@ import "core:reflect"
 import "core:strconv"
 import "core:mem"
 
-// would Result_Cursor be a better name?
-// probably not?
-Result_Metadata :: struct {
-  column_count: i32,
-  row_count: i32,
-}
-
 query :: proc(
   c: ^PGconn,
   query: cstring,
