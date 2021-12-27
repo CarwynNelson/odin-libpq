@@ -6,7 +6,7 @@ import "core:fmt"
 
 My_Data :: struct {
   name: string,
-  number: u32,
+  number: u8,
 }
 
 main :: proc() {

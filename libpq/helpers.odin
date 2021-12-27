@@ -53,16 +53,25 @@ query :: proc(
           dst = value
         }
       } else if type == INT4OID {
-        switch field.type.id {
-        case u32:
+        if field.type.id == u8 ||
+          field.type.id == u16 ||
+          field.type.id == u32 ||
+          field.type.id == u64 {
           src, _ := strconv.parse_uint(string(value))
           mem.copy(field_ptr, &src, field.type.size)
+        } else if field.type.id == i8 ||
+          field.type.id == i16 ||
+          field.type.id == i32 ||
+          field.type.id == i64 {
+          src, _ := strconv.parse_int(string(value))
+          mem.copy(field_ptr, &src, field.type.size)
+        } else {
+          assert(false, "Trying to marshal non-integer type into integer")
         }
       } else {
-        // unsupported type at the moment
         // TODO handle this better. The user of this function
         // should be able to decide if this causes a crash at runtime
-        assert(false)
+        assert(false, "Unsupported type")
       }
     }
     append(&data, item)
