@@ -52,7 +52,10 @@ query :: proc(
           case cstring:
           dst = value
         }
-      } else if type == INT4OID {
+      } else if type == INT2OID || type == INT4OID || type == INT8OID {
+        // NOTE If we were to be strict about it you would not allow
+        // marshalling this value into an unsigned int as postgres stores these
+        // as signed numbers, so they could be negative
         if field.type.id == u8 ||
           field.type.id == u16 ||
           field.type.id == u32 ||

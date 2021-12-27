@@ -66,5 +66,6 @@ Exec_Status :: enum c.int {
 // From catalog/pg_type_d.h which can be viewed at
 // src/backend/catalog/pg_type_d.h in the postgres source
 VARCHAROID :: 1043
+INT2OID    :: 21
 INT4OID    :: 23
-
+INT8OID    :: 20
