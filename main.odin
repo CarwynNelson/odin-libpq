@@ -9,6 +9,8 @@ My_Data :: struct {
   number: i32,
   small_num: i8,
   big_num: i64,
+  small_float: f32,
+  big_float: f64,
 }
 
 main :: proc() {

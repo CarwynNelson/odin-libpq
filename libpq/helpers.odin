@@ -71,6 +71,16 @@ query :: proc(
         } else {
           assert(false, "Trying to marshal non-integer type into integer")
         }
+      } else if type == FLOAT4OID || type == FLOAT8OID {
+        if field.type.id == f32 {
+          src, _ := strconv.parse_f32(string(value))
+          mem.copy(field_ptr, &src, field.type.size)
+        } else if field.type.id == f64 {
+          src, _ := strconv.parse_f64(string(value))
+          mem.copy(field_ptr, &src, field.type.size)
+        } else {
+          assert(false, "Trying to marshal non-float type into float")
+        }
       } else {
         // TODO handle this better. The user of this function
         // should be able to decide if this causes a crash at runtime
