@@ -86,7 +86,7 @@ pg_query :: proc(c: ^PGconn, query: cstring, $T: typeid) -> ([dynamic]T, bool) {
   defer PQclear(query_result)
 
   if status := PQresultStatus(query_result); status != .TUPLES_OK {
-    // handle empty query specifically? maybe instead of returning
+    // TODO: handle empty query specifically? maybe instead of returning
     // a bool we can return an enum? or maybe a bool and an enum?
     return nil, false
   }
@@ -112,10 +112,8 @@ pg_query :: proc(c: ^PGconn, query: cstring, $T: typeid) -> ([dynamic]T, bool) {
       if type == VARCHAROID {
         switch dst in &field_val {
           case string:
-          /* dst = "Hello" */
           dst = string(value)
           case cstring:
-          /* dst = "Hello" */
           dst = value
         }
       } else if type == INT4OID {
@@ -126,6 +124,8 @@ pg_query :: proc(c: ^PGconn, query: cstring, $T: typeid) -> ([dynamic]T, bool) {
         }
       } else {
         // unsupported type at the moment
+        // TODO handle this better. The user of this function
+        // should be able to decide if this causes a crash at runtime
         assert(false)
       }
     }
